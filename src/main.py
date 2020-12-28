@@ -1,5 +1,3 @@
-import types
-
 import sims4.commands
 
 import careers
@@ -14,15 +12,13 @@ def get_hourly_pay(cls, inst, sim_info=DEFAULT, career_track=DEFAULT, career_lev
     career_track = career_track if career_track is not DEFAULT else inst.current_track_tuning
     career_level = career_level if career_level is not DEFAULT else inst.level
     overmax_level = overmax_level if overmax_level is not DEFAULT else inst.overmax_level
-    logger.assert_raise(career_level >= 0, 'get_hourly_pay: Current Level is negative: {}, Level: {}', type(inst_or_cls).__name__, career_level)
-    logger.assert_raise(career_level < len(career_track.career_levels), 'get_hourly_pay: Current Level is bigger then the number of careers: {}, Level: {}', type(inst_or_cls).__name__, career_level)
     level_tuning = career_track.career_levels[career_level]
     hourly_pay = level_tuning.simoleons_per_hour
     if career_track.overmax is not None:
         hourly_pay += career_track.overmax.salary_increase * overmax_level
     hourly_pay = inst_or_cls._get_simolean_trait_bonus_pay(pay=hourly_pay, sim_info=sim_info, career_track=career_track, career_level=career_level)
     hourly_pay = int(hourly_pay)
-    return hourly_pay / 2
+    return hourly_pay / 4
 
 careers.career_base.CareerBase.get_hourly_pay = types.MethodType(get_hourly_pay, careers.career_base.CareerBase)
 
