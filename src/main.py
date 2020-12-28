@@ -21,7 +21,7 @@ def get_hourly_pay(cls, inst, sim_info=DEFAULT, career_track=DEFAULT, career_lev
     hourly_pay = int(hourly_pay)
     return hourly_pay / 4
 
-careers.career_base.CareerBase.get_hourly_pay = types.MethodType(get_hourly_pay, careers.career_base.CareerBase)
+careers.career_base.CareerBase.get_hourly_pay = get_hourly_pay
 
 @sims4.commands.Command('hellow', command_type=sims4.commands.CommandType.Live)
 def _hellow(_connection=None):
