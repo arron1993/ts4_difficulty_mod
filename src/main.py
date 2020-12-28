@@ -1,6 +1,7 @@
 import sims4.commands
 
 import careers
+import types
 
 from singletons import DEFAULT
 from sims4.utils import flexmethod
