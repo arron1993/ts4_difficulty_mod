@@ -22,7 +22,7 @@ def get_hourly_pay(cls, inst, sim_info=DEFAULT, career_track=DEFAULT, career_lev
         hourly_pay += career_track.overmax.salary_increase * overmax_level
     hourly_pay = inst_or_cls._get_simolean_trait_bonus_pay(pay=hourly_pay, sim_info=sim_info, career_track=career_track, career_level=career_level)
     hourly_pay = int(hourly_pay)
-    return int(round(hourly_pay / 4))
+    return int(round(hourly_pay * 0.33))
 
 careers.career_base.CareerBase.get_hourly_pay = get_hourly_pay
 
@@ -53,7 +53,7 @@ def _update_cached_home_lot_value(self):
     if billable_value < 0:
         logger.error('The billable household value for household {} is a negative number ({}). Defaulting to 0.', self, billable_value, owner='tastle')
         billable_value = 0
-    self._cached_home_lot_value = billable_value
+    self._cached_home_lot_value = billable_value * 10
 
 Household._update_cached_home_lot_value = types.MethodType(_update_cached_home_lot_value, Household)
 
