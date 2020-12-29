@@ -39,23 +39,33 @@ import objects
 @property
 def price(self):
     log("Price")
-    return self._catalog_price * 1.5
+    return round(int(self._catalog_price * 1.5))
 
-objects.definition.Definition.price = price
+# objects.definition.Definition.price = price
 
-from sims4.tuning.tunable import TunableList, TunableTuple, TunablePercent, TunableInterval
-import sims
-BILL_BRACKETS = TunableList(description="\n        A list of brackets that determine the percentages that each portion of\n        a household's value is taxed at.\n        \n        ex: The first $2000 of a household's value is taxed at 10%, and\n        everything after that is taxed at 15%.\n        ",
-    tunable=TunableTuple(description='\n            A value range and tax percentage that define a bill bracket.\n            ',
-    value_range=TunableInterval(description="\n                A tunable range of integers that specifies a portion of a\n                household's total value.\n                ",
-    tunable_type=int,
-    default_lower=0,
-    default_upper=None),
-    tax_percentage=TunablePercent(description="\n                A tunable percentage value that defines what percent of a\n                household's value within this value_range the player is billed\n                for.\n                ",
-    default=33)))
+from sims.bills import Bills
+def _get_property_taxes(self):
+    log("Get property taxes")
+    plex_service = services.get_plex_service()
+    if plex_service.is_zone_an_apartment((self._household.home_zone_id), consider_penthouse_an_apartment=False):
+        return 0
+    billable_household_value = self._household.household_net_worth(billable=True)
+    tax_value = 0
+    for bracket in Bills.BILL_BRACKETS:
+        lower_bound = bracket.value_range.lower_bound
+        if billable_household_value >= lower_bound:
+            upper_bound = bracket.value_range.upper_bound
+            if upper_bound is None:
+                upper_bound = billable_household_value
+            bound_difference = upper_bound - lower_bound
+            value_difference = billable_household_value - lower_bound
+            if value_difference > bound_difference:
+                value_difference = bound_difference
+            value_difference *= 0.33
+            tax_value += value_difference
+    return tax_value
 
-sims.bills.Bills.BILL_BRACKETS = BILL_BRACKETS
-
+Bills._get_property_taxes = _get_property_taxes
 @sims4.commands.Command('hellow', command_type=sims4.commands.CommandType.Live)
 def _hellow(_connection=None):
     output = sims4.commands.CheatOutput(_connection)
