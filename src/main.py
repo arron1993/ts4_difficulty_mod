@@ -8,6 +8,7 @@ from sims.household import Household
 
 from singletons import DEFAULT
 from sims4.utils import flexmethod
+from sims4.log import Logger
 
 @flexmethod
 def get_hourly_pay(cls, inst, sim_info=DEFAULT, career_track=DEFAULT, career_level=DEFAULT, overmax_level=DEFAULT):
@@ -27,6 +28,8 @@ def get_hourly_pay(cls, inst, sim_info=DEFAULT, career_track=DEFAULT, career_lev
 careers.career_base.CareerBase.get_hourly_pay = get_hourly_pay
 
 def _update_cached_home_lot_value(self):
+    logger = Logger('HouseholdManager', default_owner='manus')
+    logger.info("Difficulty Mod: _update_cached_home_lot_value")
     home_zone = services.get_zone(self.home_zone_id)
     if not home_zone:
         return
