@@ -43,40 +43,18 @@ def price(self):
 
 objects.definition.Definition.price = price
 
-import sims4
+from sims4.tuning.tunable import TunableList, TunableTuple, TunablePercent, TunableInterval
+import sims
+BILL_BRACKETS = TunableList(description="\n        A list of brackets that determine the percentages that each portion of\n        a household's value is taxed at.\n        \n        ex: The first $2000 of a household's value is taxed at 10%, and\n        everything after that is taxed at 15%.\n        ",
+    tunable=TunableTuple(description='\n            A value range and tax percentage that define a bill bracket.\n            ',
+    value_range=TunableInterval(description="\n                A tunable range of integers that specifies a portion of a\n                household's total value.\n                ",
+    tunable_type=int,
+    default_lower=0,
+    default_upper=None),
+    tax_percentage=TunablePercent(description="\n                A tunable percentage value that defines what percent of a\n                household's value within this value_range the player is billed\n                for.\n                ",
+    default=33)))
 
-def load_object(self, object_data, **kwargs):
-    log(f"Load Object {object_data.cost}")
-    if object_data.HasField('owner_id'):
-        self._household_owner_id = object_data.owner_id
-    else:
-        if self.is_downloaded:
-            self.base_value = self.catalog_value * 1.5
-        else:
-            self.base_value = object_data.cost * 1.5
-        self.new_in_inventory = object_data.is_new
-        (super().load_object)(object_data, **kwargs)
-        if object_data.HasField('texture_id'):
-            if self.canvas_component is not None:
-                self.canvas_component.set_painting_texture_id(object_data.texture_id)
-        if object_data.HasField('needs_depreciation'):
-            self._needs_depreciation = object_data.needs_depreciation
-        if object_data.HasField('needs_post_bb_fixup'):
-            self._needs_post_bb_fixup = object_data.needs_post_bb_fixup
-        else:
-            self._needs_post_bb_fixup = self._needs_depreciation
-    inventory = self.inventory_component
-    if inventory is not None:
-        inventory.load_items(object_data.unique_inventory)
-    if sims4.protocol_buffer_utils.has_field(object_data, 'buildbuy_use_flags'):
-        self._build_buy_use_flags = object_data.buildbuy_use_flags
-    self.is_new_object = object_data.is_new_object
-    if self.is_new_object:
-        self.add_dynamic_component(objects.components.types.NEW_OBJECT_COMPONENT)
-    if object_data.persisted_tags is not None:
-        self.append_tags(set(object_data.persisted_tags))
-
-objects.game_object.GameObject.load_object = load_object
+sims.bills.Bills.BILL_BRACKETS = BILL_BRACKETS
 
 @sims4.commands.Command('hellow', command_type=sims4.commands.CommandType.Live)
 def _hellow(_connection=None):
