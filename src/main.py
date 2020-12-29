@@ -1,7 +1,10 @@
 import sims4.commands
 
 import careers
+import services
 import types
+
+from sims.household import Household
 
 from singletons import DEFAULT
 from sims4.utils import flexmethod
@@ -22,6 +25,37 @@ def get_hourly_pay(cls, inst, sim_info=DEFAULT, career_track=DEFAULT, career_lev
     return int(round(hourly_pay / 4))
 
 careers.career_base.CareerBase.get_hourly_pay = get_hourly_pay
+
+def _update_cached_home_lot_value(self):
+    home_zone = services.get_zone(self.home_zone_id)
+    if not home_zone:
+        return
+    billable_value = 0
+    billable_value += home_zone.lot.furnished_lot_value
+    plex_service = services.get_plex_service()
+    is_plex = plex_service.is_zone_a_plex(self.home_zone_id)
+    for obj in services.object_manager().values():
+        if obj.is_sim:
+            continue
+        if obj.get_household_owner_id() == self.id:
+            continue
+        if is_plex:
+            if plex_service.get_plex_zone_at_position(obj.position, obj.level) != self.home_zone_id:
+                continue
+            else:
+                if not home_zone.lot.is_position_on_lot(obj.position):
+                    continue
+            billable_value -= obj.current_value
+            obj_inventory = obj.inventory_component
+            if obj_inventory is not None:
+                billable_value -= obj_inventory.inventory_value
+
+    if billable_value < 0:
+        logger.error('The billable household value for household {} is a negative number ({}). Defaulting to 0.', self, billable_value, owner='tastle')
+        billable_value = 0
+    self._cached_home_lot_value = billable_value
+
+Household._update_cached_home_lot_value = types.MethodType(_update_cached_home_lot_value, Household)
 
 @sims4.commands.Command('hellow', command_type=sims4.commands.CommandType.Live)
 def _hellow(_connection=None):
