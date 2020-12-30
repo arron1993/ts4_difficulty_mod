@@ -61,7 +61,7 @@ def _get_property_taxes(self):
             value_difference = billable_household_value - lower_bound
             if value_difference > bound_difference:
                 value_difference = bound_difference
-            value_difference *= 0.33
+            value_difference *= 0.05
             tax_value += value_difference
     return tax_value
 
