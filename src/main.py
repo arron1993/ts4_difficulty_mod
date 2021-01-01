@@ -1,4 +1,5 @@
 import os
+import datetime
 
 import sims4.commands
 
@@ -12,10 +13,12 @@ from singletons import DEFAULT
 from sims4.utils import flexmethod
 from sims4.log import Logger
 
+ENABLE_LOGGING = True
 def log(text):
-    path = os.path.join("C:", "Users", "moorey", "projects", "ts4_difficulty_mod", "src", "log.txt")
-    with open(path, 'a') as f:
-        f.write(f"{text}\n")
+    if ENABLE_LOGGING:
+        path = os.path.join("C:", "Users", "moorey", "projects", "ts4_difficulty_mod", "src", "log.txt")
+        with open(path, 'a') as f:
+            f.write(f"{datetime.datetime.now().isoformat()} {text}\n")
 
 @flexmethod
 def get_hourly_pay(cls, inst, sim_info=DEFAULT, career_track=DEFAULT, career_level=DEFAULT, overmax_level=DEFAULT):
@@ -29,15 +32,18 @@ def get_hourly_pay(cls, inst, sim_info=DEFAULT, career_track=DEFAULT, career_lev
     if career_track.overmax is not None:
         hourly_pay += career_track.overmax.salary_increase * overmax_level
     hourly_pay = inst_or_cls._get_simolean_trait_bonus_pay(pay=hourly_pay, sim_info=sim_info, career_track=career_track, career_level=career_level)
-    hourly_pay = int(hourly_pay)
-    pay_downgrader = 0.33
-    if career_level < 5:
-        pay_downgrader = 0.33
-    elif career_level < 7:
-        pay_downgrader = 0.4
-    else:
-        pay_downgrader = 0.5
-    return int(round(hourly_pay * pay_downgrader))
+    
+    if overmax_level == 0:
+        if career_level < 5:
+            pay_reduction = 0.33
+        else:
+            pay_reduction = 0.5
+    else: 
+        pay_reduction = 0.55
+    
+    hourly_pay = int(round(hourly_pay * pay_reduction))
+    log(f"career level is {career_level}, overmax level is {overmax_level} reducing pay to {pay_reduction} of original new salary is {hourly_pay}")
+    return hourly_pay
 
 careers.career_base.CareerBase.get_hourly_pay = get_hourly_pay
 
