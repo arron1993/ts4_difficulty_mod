@@ -34,10 +34,7 @@ def get_hourly_pay(cls, inst, sim_info=DEFAULT, career_track=DEFAULT, career_lev
     hourly_pay = inst_or_cls._get_simolean_trait_bonus_pay(pay=hourly_pay, sim_info=sim_info, career_track=career_track, career_level=career_level)
     
     if overmax_level == 0:
-        if career_level < 5:
-            pay_reduction = 0.33
-        else:
-            pay_reduction = 0.5
+        pay_reduction = 0.33
     else: 
         pay_reduction = 0.55
     
