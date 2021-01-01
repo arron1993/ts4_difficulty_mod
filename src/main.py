@@ -30,7 +30,14 @@ def get_hourly_pay(cls, inst, sim_info=DEFAULT, career_track=DEFAULT, career_lev
         hourly_pay += career_track.overmax.salary_increase * overmax_level
     hourly_pay = inst_or_cls._get_simolean_trait_bonus_pay(pay=hourly_pay, sim_info=sim_info, career_track=career_track, career_level=career_level)
     hourly_pay = int(hourly_pay)
-    return int(round(hourly_pay * 0.33))
+    pay_downgrader = 0.33
+    if career_level < 5:
+        pay_downgrader = 0.33
+    elif career_level < 7:
+        pay_downgrader = 0.4
+    else:
+        pay_downgrader = 0.5
+    return int(round(hourly_pay * pay_downgrader))
 
 careers.career_base.CareerBase.get_hourly_pay = get_hourly_pay
 
